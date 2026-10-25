@@ -30,7 +30,9 @@
     "LICENSE"
   ],
   "pi": {
-    "extensions": []
+    "extensions": [
+      "./src/report-guard.js"
+    ]
   },
   "pi-cowboy": {
     "plugin": "./src/plugin.js"

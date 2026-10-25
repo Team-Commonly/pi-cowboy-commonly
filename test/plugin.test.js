@@ -75,9 +75,11 @@ test("package name keeps the pi-cowboy- prefix pi-cowboy's discovery requires", 
   assert.ok(pkg.name.startsWith("pi-cowboy-"), "pi-cowboy only loads packages named pi-cowboy-*");
   assert.equal(pkg["pi-cowboy"].plugin, "./src/plugin.js");
   // pi loads a local package that has neither a pi manifest nor an extensions/
-  // directory as one extension and requires the folder itself, which fails. An
-  // empty list says the package carries no pi extensions; pi-cowboy loads the plugin.
-  assert.deepEqual(pkg.pi, { extensions: [] }, "a plugin must not be declared under pi.extensions");
+  // directory as one extension and requires the folder itself, which fails. The
+  // list names only the report guard, which pi loads into each subagent; the
+  // plugin is pi-cowboy's to load, and listing it here would load it twice.
+  assert.deepEqual(pkg.pi, { extensions: ["./src/report-guard.js"] });
+  assert.ok(!pkg.pi.extensions.includes(pkg["pi-cowboy"].plugin), "a plugin must not be declared under pi.extensions");
 });
 
 test("postLine never throws: network errors and HTTP errors both resolve", async () => {

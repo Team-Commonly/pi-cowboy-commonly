@@ -2,6 +2,8 @@
 // Every function returns an array of lines (often empty) and never throws on
 // odd input: these shapes belong to pi-cowboy and may change.
 
+import { NOTICE_TITLE } from "./report-guard.js";
+
 const MAX_LINE = 280;
 const MAX_EXCERPT = 140;
 
@@ -56,6 +58,8 @@ function settled(status, type, agentId, label, ms, body) {
     case "stopped":
       return `${name} was stopped${duration(ms)}`;
     default: {
+      // The report guard's notice settles a run that never reported; it is not a result.
+      if (typeof body === "string" && body.includes(NOTICE_TITLE)) return `${name} ended without a report${duration(ms)}`;
       const ex = excerpt(body);
       return `${name} completed${duration(ms)}${ex ? `: ${ex}` : ""}`;
     }
