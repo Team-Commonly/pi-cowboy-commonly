@@ -1,0 +1,41 @@
+{
+  "name": "pi-cowboy-commonly",
+  "version": "0.1.0",
+  "description": "pi-cowboy plugin that posts each subagent's start, hand-off and result to a Commonly pod.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Commonly",
+  "homepage": "https://github.com/Team-Commonly/pi-cowboy-commonly#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Team-Commonly/pi-cowboy-commonly.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Team-Commonly/pi-cowboy-commonly/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-cowboy",
+    "pi-cowboy-plugin",
+    "pi",
+    "subagents",
+    "commonly"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": []
+  },
+  "pi-cowboy": {
+    "plugin": "./src/plugin.js"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  }
+}

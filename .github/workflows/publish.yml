@@ -1,0 +1,76 @@
+name: Publish to npm
+
+# Publishes pi-cowboy-commonly when a release tag (v<version>) is pushed.
+#
+# Auth: npm trusted publishing (OIDC). No token is stored anywhere. The package
+# on npmjs.com names this repo and this workflow file as its trusted publisher,
+# and the job's id-token is exchanged for a short-lived publish credential.
+# That needs npm >= 11.5.1 and `id-token: write`. Provenance is attached.
+#
+# The first publish of a new package cannot use OIDC (the package must exist on
+# npmjs.com before a trusted publisher can be attached to it); publish 0.1.0 by
+# hand from an org owner's account, configure the trusted publisher, then tag.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write # npm trusted publishing (OIDC) + provenance
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false # never abort a publish mid-flight
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # No `registry-url`: setup-node@v4 would then write an `_authToken` line
+      # to the runner npmrc, and npm reads a present-but-empty token as "auth
+      # configured", skips the OIDC exchange and fails E404.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Tag matches package.json version
+        shell: bash
+        run: |
+          set -euo pipefail
+          want="v$(node -p "require('./package.json').version")"
+          [ "$GITHUB_REF_NAME" = "$want" ] || { echo "::error::tag $GITHUB_REF_NAME does not match package.json ($want)"; exit 1; }
+
+      - name: Test
+        run: npm test
+
+      # Trusted publishing needs npm >= 11.5.1.
+      - name: Use an npm that supports trusted publishing
+        run: npm install -g npm@^11.5.1 && npm --version
+
+      - name: Refuse to publish without a usable OIDC identity
+        run: |
+          [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ] || { echo "::error::id-token: write is not in effect; trusted publishing cannot run"; exit 1; }
+          for f in "${NPM_CONFIG_USERCONFIG:-}" "$HOME/.npmrc" ./.npmrc; do
+            [ -n "$f" ] && [ -f "$f" ] && grep -q '_authToken' "$f" && { echo "::error::$f carries _authToken; npm would skip the OIDC exchange and fail E404"; exit 1; }
+          done
+          true
+
+      # No NODE_AUTH_TOKEN: npm exchanges this job's OIDC id-token with the registry.
+      - name: Publish
+        run: npm publish --provenance --access public
+
+      - name: Read it back from the registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          name=$(node -p "require('./package.json').name")
+          want=$(node -p "require('./package.json').version")
+          for i in $(seq 1 20); do
+            got=$(npm view "$name@$want" version 2>/dev/null || true)
+            [ "$got" = "$want" ] && { echo "✓ $name@$want is on the registry"; exit 0; }
+            sleep 6
+          done
+          echo "::error::$name@$want not visible on the registry after 120s"; exit 1
