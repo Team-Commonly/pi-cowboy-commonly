@@ -1,6 +1,6 @@
 {
   "name": "pi-cowboy-commonly",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "pi-cowboy plugin that posts each subagent's start, hand-off and result to a Commonly pod.",
   "type": "module",
   "license": "Apache-2.0",

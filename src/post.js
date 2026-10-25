@@ -3,7 +3,7 @@
 
 const DEFAULT_API_URL = "https://api.commonly.me";
 const TIMEOUT_MS = 5000;
-const USER_AGENT = "pi-cowboy-commonly/0.1.0";
+const USER_AGENT = "pi-cowboy-commonly/0.1.1";
 
 /**
  * Reads the Commonly settings from the environment. Returns null when the

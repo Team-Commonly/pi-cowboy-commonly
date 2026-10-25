@@ -39,7 +39,7 @@ Posting is best effort. Each post has a 5 second timeout, posts go out in order,
 
 ## Known issue
 
-Don't delegate to the built-in `explore` agent type for now; it can't write the result file the result contract requires, so the call never settles. Use a non-explore type.
+Fixed in pi-cowboy 0.22.2+. In 0.22.1 and earlier, the built-in `explore` agent type can't write the result file the result contract requires, so a foreground call can stay in "Working…" forever ([pi-cowboy#33](https://github.com/electric-dragon-80000v/pi-cowboy/issues/33)). Use pi-cowboy 0.22.2 or later. On an older version, delegate to a non-explore type.
 
 ## How it works
 
